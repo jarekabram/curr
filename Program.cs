@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using curr.Models;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,7 +15,9 @@ namespace curr
     {
         public static void Main(string[] args)
         {
-            CreateWebHostBuilder(args).Build().Run();
+            // CreateWebHostBuilder(args).Build().Run();
+            WebsiteReader wb = new WebsiteReader();
+            wb.DownloadLines("http://www.nbp.pl/kursy/xml/dir.txt");
         }
 
         public static IWebHostBuilder CreateWebHostBuilder(string[] args) =>
