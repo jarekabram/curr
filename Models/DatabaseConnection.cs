@@ -29,11 +29,7 @@ namespace curr.Models
             connection.Open();
             System.Console.WriteLine( "Server Version: " + connection.ServerVersion + "\nDatabase: " + connection.Database );
         }
-        // public void Get()
-        // {
-        //     var sqlTransaction = connection.BeginTransaction();
-        // }
-        public void Insert(PopularCurrency popularCurrency)
+        public void InsertIntoCurrencyTable(PopularCurrency popularCurrency)
         {
             // Start a local transaction.
             MySqlCommand command = connection.CreateCommand();
@@ -80,6 +76,63 @@ namespace curr.Models
                     Helper.TraceMessage("  Message: "+ transactionException.Message);
                 }
             }
+        }
+        public bool InsertIntoFilesAndDatesTable(string id, DateTime dateTime)
+        {
+            bool result = false;
+            if(!IsElementAlreadyInDatabase(id))
+            {
+                MySqlCommand command = connection.CreateCommand();
+                try
+                {
+                    command.CommandText =
+                        "insert into currency.files_and_dates(id, date) values "+
+                        "(\"" + id +"\""+ ", "+
+                        "\'" + dateTime.Date.Year+"-"+dateTime.Date.Month+"-"+dateTime.Date.Day+"\'"+ 
+                        ")";
+                    command.ExecuteNonQuery();
+                    Helper.TraceMessage("Records was written to database.");
+                }
+                catch (Exception ex)
+                {
+                    Helper.TraceMessage("Commit Exception Type: " + ex.GetType());
+                    Helper.TraceMessage("  Message: "+ ex.Message);
+                }
+            }
+            else
+            {
+                Helper.TraceMessage(" Record already exists in table ");
+            }
+            return result;
+        }
+        
+        public bool IsElementAlreadyInDatabase( string id )
+        {
+            MySqlCommand command = connection.CreateCommand();
+            bool result = false;
+            try
+            {
+                command.CommandText = "SELECT EXISTS(SELECT * FROM currency.files_and_dates WHERE `ID`=\""+id+"\");";
+                command.ExecuteNonQuery();
+                using (MySqlDataReader reader = command.ExecuteReader())
+                {
+                    try
+                    {
+                        result = reader.Read();
+                    }
+                    catch (Exception ex){
+                        Helper.TraceMessage("Commit Exception Type: " + ex.GetType());
+                        Helper.TraceMessage("  Message: "+ ex.Message);
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Helper.TraceMessage("Commit Exception Type: " + ex.GetType());
+                Helper.TraceMessage("  Message: "+ ex.Message);
+            }
+            return result;
         }
         public void CloseConnectionToDatabase()
         {
